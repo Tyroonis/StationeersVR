@@ -35,8 +35,8 @@ namespace StationeersVR.Patches
                 __instance.transform.Rotate(0, 180, 0);
                 __instance.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
                 go.GetComponent<Canvas>().sortingOrder = __instance.transform.GetComponentInParent<Canvas>().sortingOrder + 1;
-                __instance.transform.gameObject.layer = 27;
-                go.layer = 27;
+                __instance.transform.gameObject.layer = 30;
+                go.layer = 30;
             }
         }
 
@@ -50,10 +50,10 @@ namespace StationeersVR.Patches
                 if (go.GetComponent<Canvas>() == null)
                     go.AddComponent<Canvas>();
                 __instance.Transform.SetParent(go.transform, false);
-                __instance.Transform.GetComponent<RectTransform>().localScale = new Vector3(0.0002f, 0.0002f, 0.0002f);
+                __instance.Transform.GetComponent<RectTransform>().localScale = new Vector3(0.001f, 0.001f, 0.001f);
                 go.GetComponent<Canvas>().sortingOrder = __instance.Transform.GetComponentInParent<Canvas>().sortingOrder + 1;
-                __instance.Transform.gameObject.layer = 27;
-                go.layer = 27;
+                __instance.Transform.gameObject.layer = 30;
+                go.layer = 30;
             }
         }
 
@@ -75,7 +75,7 @@ namespace StationeersVR.Patches
                    // Vector3 quadrant = UITooltipPanel.GetQuadrant(mousePosition);
                   //  Vector3 vector = new Vector3( __instance._offset,  __instance._offset);
                     __instance.Transform.LookAt(Camera.current.transform, Vector3.up);
-                    __instance.Transform.position = mousePosition + new Vector3(0,0.02f,0);// + vector;// - vector;// * __instance._canvas.scaleFactor;
+                    __instance.Transform.position = mousePosition + new Vector3(0,0.2f,0);// + vector;// - vector;// * __instance._canvas.scaleFactor;
                     __instance.Transform.Rotate(0, 180, 0);
                     __instance.RefreshText();
                 }

@@ -1,37 +1,39 @@
+using Assets.Scripts;
+using Assets.Scripts.GridSystem;
+using Assets.Scripts.Inventory;
+using Assets.Scripts.Objects;
+using Assets.Scripts.Objects.Entities;
+using Assets.Scripts.UI;
+using Assets.Scripts.Util;
 using BepInEx;
-using static StationeersVR.Utilities.VRAssetManager;
+using ch.sycoforge.Flares;
+using JetBrains.Annotations;
+using RootMotion.FinalIK;
+using SimpleSpritePacker;
+using StationeersVR.Patches;
 using StationeersVR.Utilities;
+using StationeersVR.VRCore.UI;
+
+using System.Collections;
+using System.Collections.Generic;
 //using AmplifyOcclusion;
 using System.Reflection;
-using RootMotion.FinalIK;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
+using UnityEngine.EventSystems;
 //using UnityEngine.PostProcessing;
 using UnityEngine.SceneManagement;
 using UnityEngine.SpatialTracking;
+using UnityEngine.TextCore.Text;
+using UnityEngine.UI;
+using UnityStandardAssets.ImageEffects;
+using Util;
 //using UnityStandardAssets.ImageEffects;
 using Valve.VR;
 using Valve.VR.Extras;
 using Valve.VR.InteractionSystem;
-using Assets.Scripts.UI;
-using Assets.Scripts.Objects.Entities;
-using Assets.Scripts;
 using static Assets.Scripts.MovementController;
-using Assets.Scripts.Inventory;
-using System.Collections.Generic;
-using Unity.Collections.LowLevel.Unsafe;
-using System.Collections;
-using UnityEngine.UI;
-using StationeersVR.Patches;
-using ch.sycoforge.Flares;
-using Util;
-using Assets.Scripts.Util;
-using SimpleSpritePacker;
-using UnityEngine.TextCore.Text;
-using Assets.Scripts.GridSystem;
-using UnityEngine.EventSystems;
-using StationeersVR.VRCore.UI;
-using Assets.Scripts.Objects;
-using UnityStandardAssets.ImageEffects;
+using static StationeersVR.Utilities.VRAssetManager;
 
 
 
@@ -70,7 +72,7 @@ namespace StationeersVR.VRCore
         // Unity AssetBundle project too. If they don't match,
         // the hands won't be rendered by the handsCam.
         private static Vector3 FIRST_PERSON_OFFSET = Vector3.zero;
-        private static float SIT_HEIGHT_ADJUST = -0.7f;
+        private static float SIT_HEIGHT_ADJUST = -3.7f;
         private static float SIT_ATTACH_HEIGHT_ADJUST = -0.4f;
         private static Vector3 THIRD_PERSON_0_OFFSET = new(0f, 1.0f, -0.6f);
         private static Vector3 THIRD_PERSON_1_OFFSET = new(0f, 1.4f, -1.5f);
@@ -276,25 +278,7 @@ namespace StationeersVR.VRCore
                 gameObject.AddComponent<VRControls>();
             }
             gameObject.AddComponent<InputFieldManager>();
-        }
-
-        public void Scale(RectTransform rect, float _scaleFactor)
-        {
-            if (Camera.current)
-            {
-                float camHeight;
-                if (Camera.current.orthographic)
-                {
-                    camHeight = Camera.current.orthographicSize * 2;
-                }
-                else
-                {
-                    float distanceToCamera = Vector3.Distance(Camera.current.transform.position, rect.position);
-                    camHeight = 2.0f * distanceToCamera * Mathf.Tan(Mathf.Deg2Rad * (Camera.current.fieldOfView * 0.5f));
-                }
-                float scale = (camHeight / Screen.width) * _scaleFactor;
-                rect.localScale = new Vector3(scale, scale, scale);
-            }
+            
         }
 
         void Update()
@@ -308,8 +292,8 @@ namespace StationeersVR.VRCore
             enableCameras();
             checkAndSetHandsAndPointers();
             updateVrik();
-            GUIVR.UpdateHud();
-            GUIVR.ToggleHudElements();
+            //GUIVR.UpdateHud();
+            //GUIVR.ToggleHudElements();
             GetGameState();
             if (Input.GetKey(KeyCode.Y))
             {
@@ -330,11 +314,21 @@ namespace StationeersVR.VRCore
                 timerRight -= Time.deltaTime;
                 rightHand.hapticAction.Execute(0f, 0.1f, 20f, 0.1f, SteamVR_Input_Sources.RightHand);
             }
+            //if (Camera.current != null)
+           // {
+               // if (GameManager.GameState == GameState.Running)
+                    //if (CameraUtils.GetCamera(CameraUtils.VR_CAMERA).GetComponent<VRHUDManager>() == null)
+                        // 6. Add the VRHUDManager component to the cube
+                        // to manage the VR HUD.
+                        // This is needed to ensure that the HUD is always
+                        // attached to the camera and can be updated.
+                        //Camera.main.gameObject.AddComponent<VRHUDManager>();
+                 //DontDestroyOnLoad(cube);
+           // }
         }
-
-        void GetGameState()
+        public static void GetGameState()
         {
-            if(GameManager.GameState != currentgameState)
+            if (GameManager.GameState != currentgameState)
             {
                 currentgameState = GameManager.GameState;
                 ModLog.Debug("Gamestate Changed to " + currentgameState + " Vr Re-Centered");
@@ -606,7 +600,7 @@ namespace StationeersVR.VRCore
                 Camera vrCam = CameraUtils.GetCamera("VRCamera");
                 if (!(vrCam == null) && !(vrCam.gameObject == null))
                 {
-                    GameObject vrbackground = new GameObject("VRBackgroundCamera");
+                    GameObject vrbackground = new ("VRBackgroundCamera");
                     Camera vrBackgroundCam = vrbackground.AddComponent<Camera>();
                     vrBackgroundCam.CopyFrom(originalbackgroundCamera);
                     vrBackgroundCam.depth = -2f;
@@ -631,7 +625,7 @@ namespace StationeersVR.VRCore
                 Camera vrCam = CameraUtils.GetCamera("VRCamera");
                 if (!(vrCam == null) && !(vrCam.gameObject == null))
                 {
-                    GameObject vrforeground = new GameObject("VRForegroundCamera");
+                    GameObject vrforeground = new ("VRForegroundCamera");
                     Camera vrForegroundCam = vrforeground.AddComponent<Camera>();
                     vrForegroundCam.CopyFrom(originalforegroundCamera);
                     vrForegroundCam.depth = -2f;
@@ -692,10 +686,11 @@ namespace StationeersVR.VRCore
             // Turn off rendering the UI panel layer. We need to capture
             // it in a camera of higher depth so that it
             // is rendered on top of everything else. (except hands)
-            //            vrCam.cullingMask &= ~(1 << LayerUtils.getUiPanelLayer());
-            //            vrCam.cullingMask &= ~(1 << LayerMask.NameToLayer("UI"));
-            //            vrCam.cullingMask &= ~(1 << LayerUtils.getHandsLayer());
-            //            vrCam.cullingMask &= ~(1 << LayerUtils.getWorldspaceUiLayer());
+                        //vrCam.cullingMask &= ~(1 << LayerUtils.getUiPanelLayer());
+                        //vrCam.cullingMask &= ~(1 << LayerMask.NameToLayer("UI"));
+                        //vrCam.cullingMask &= ~(1 << LaygameObject.layererUtils.getHandsLayer());
+                        //vrCam.cullingMask &= ~(1 << LayerUtils.getWorldspaceUiLayer());
+                        //vrCam.cullingMask &= ~(1 << 31);
             mainCamera.enabled = false;
             mainCamera.gameObject.tag = "Untagged";
             vrCam.tag = "MainCamera";
@@ -728,7 +723,7 @@ namespace StationeersVR.VRCore
         {
             ModLog.Error("Creating GUI Camera");
             //_guiTexture = new RenderTexture(new RenderTextureDescriptor((int)GUI_DIMENSIONS.x, (int)GUI_DIMENSIONS.y));
-            GameObject guiCamObj = new GameObject(CameraUtils.VRGUI_SCREENSPACE_CAM);
+            GameObject guiCamObj = new (CameraUtils.VRGUI_SCREENSPACE_CAM);
             DontDestroyOnLoad(guiCamObj);
             _guiCamera = guiCamObj.AddComponent<Camera>();
             _guiCamera.orthographic = true;
@@ -744,10 +739,12 @@ namespace StationeersVR.VRCore
             _guiCamera.clearFlags = CameraClearFlags.Depth;
             // Required to actually capture only the GUI layer
             //_guiCamera.cullingMask = (0 << LayerMask.NameToLayer("UI"));
-            _guiCamera.cullingMask = (1 << LayerMask.NameToLayer("UI"));
+            _guiCamera.cullingMask = (1 << 31);
             _guiCamera.farClipPlane = 5f;
             _guiCamera.nearClipPlane = 0.1f;
             _guiCamera.enabled = true;
+            VRManager.TryRecenter();
+            gameObject.AddComponent<VrUiConverter>();
             createUiPanelCamera1();
         }
 
@@ -758,7 +755,7 @@ namespace StationeersVR.VRCore
             {
                 return;
             }
-            GameObject uiPanelCameraObj = new GameObject(CameraUtils.VR_UI_CAMERA);
+            GameObject uiPanelCameraObj = new (CameraUtils.VR_UI_CAMERA);
             _uiPanelCamera = uiPanelCameraObj.AddComponent<Camera>();
             _uiPanelCamera.CopyFrom(CameraUtils.GetCamera(CameraUtils.VR_CAMERA));
             _uiPanelCamera.depth = _guiCamera.depth;
@@ -873,21 +870,15 @@ namespace StationeersVR.VRCore
         //TODO: For now, the mod only works in single player. Need to work on this for 3rd person view
         private static Vector3 getHeadOffset(HeadZoomLevel headZoomLevel)
         {
-            switch (headZoomLevel)
+            return headZoomLevel switch
             {
-                case HeadZoomLevel.FirstPerson:
-                    return FIRST_PERSON_OFFSET;
-                case HeadZoomLevel.ThirdPerson0:
-                    return THIRD_PERSON_0_OFFSET + THIRD_PERSON_CONFIG_OFFSET;
-                case HeadZoomLevel.ThirdPerson1:
-                    return THIRD_PERSON_1_OFFSET + THIRD_PERSON_CONFIG_OFFSET;
-                case HeadZoomLevel.ThirdPerson2:
-                    return THIRD_PERSON_2_OFFSET + THIRD_PERSON_CONFIG_OFFSET;
-                case HeadZoomLevel.ThirdPerson3:
-                    return THIRD_PERSON_3_OFFSET + THIRD_PERSON_CONFIG_OFFSET;
-                default:
-                    return FIRST_PERSON_OFFSET;
-            }
+                HeadZoomLevel.FirstPerson => FIRST_PERSON_OFFSET,
+                HeadZoomLevel.ThirdPerson0 => THIRD_PERSON_0_OFFSET + THIRD_PERSON_CONFIG_OFFSET,
+                HeadZoomLevel.ThirdPerson1 => THIRD_PERSON_1_OFFSET + THIRD_PERSON_CONFIG_OFFSET,
+                HeadZoomLevel.ThirdPerson2 => THIRD_PERSON_2_OFFSET + THIRD_PERSON_CONFIG_OFFSET,
+                HeadZoomLevel.ThirdPerson3 => THIRD_PERSON_3_OFFSET + THIRD_PERSON_CONFIG_OFFSET,
+                _ => FIRST_PERSON_OFFSET,
+            };
         }
 
         // Some logic from GameCamera class
@@ -1024,7 +1015,7 @@ namespace StationeersVR.VRCore
 
         private float getHeadHeightAdjust(Human player)
         {
-            if (player.MovementController.ControlMode == Mode.Seated)
+            if (player.MovementController.ControlMode == Mode.CryoTube)
             {
                 return SIT_HEIGHT_ADJUST;
                 /*if (player.IsAttached())
@@ -1057,6 +1048,7 @@ namespace StationeersVR.VRCore
                     validVrikAnimatorState(player.GetComponentInChildren<Animator>());
                 //LeftHandQuickMenu.instance.UpdateWristBar();
                 //RightHandQuickMenu.instance.UpdateWristBar();
+               // ModLog.Error("VRHudManager: " + player.GetComponent<VRHUDManager>());
             }
         }
 
@@ -1219,11 +1211,11 @@ namespace StationeersVR.VRCore
         // cause problems like VolumetricLightRenderer or are not used in main camera.
         // maybeCopyCameraComponents will also copy the components fields values.
         // Camera component updates are done by harmony patches on CameraControllerPatches.
-        private static readonly HashSet<string> SkipComponentNames = new HashSet<string>
-        {
+        private static readonly HashSet<string> SkipComponentNames =
+        [
             "Camera", "TransformLock", "Antialiasing", "SSAOPro", "Bloom",
             "VolumetricLightRenderer"
-        };
+        ];
 
         private void maybeCopyCameraComponents(Camera vrCamera, Camera mainCamera)
         {
@@ -1294,6 +1286,10 @@ namespace StationeersVR.VRCore
 
         private static void DisableRigidBodies(GameObject root)
         {
+            foreach (var bc in root.GetComponentsInChildren<BodyCollider>())
+            {
+                bc.gameObject.SetActive(false);
+            }
             foreach (var rb in root.GetComponentsInChildren<Rigidbody>())
             {
                 rb.gameObject.SetActive(false);
@@ -1301,6 +1297,10 @@ namespace StationeersVR.VRCore
             foreach (var sc in root.GetComponentsInChildren<SphereCollider>())
             {
                 sc.gameObject.SetActive(false);
+            }
+            foreach (var c in root.GetComponentsInChildren<Collider>())
+            {
+                c.gameObject.SetActive(false);
             }
         }
 

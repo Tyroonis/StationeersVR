@@ -1,28 +1,30 @@
-﻿using System.Reflection;
+﻿using Assets.Scripts;
+using Assets.Scripts.UI;
+using Assets.Scripts.Util;
+using BepInEx;
+using HarmonyLib;
+using ImGuiNET;
+using SimpleSpritePacker;
+using StationeersVR.Patches;
+using StationeersVR.Utilities;
+using StationeersVR.VRCore;
+using StationeersVR.VRCore.UI;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using BepInEx;
-using HarmonyLib;
-using UnityEngine;
-using Valve.VR;
-using UnityEngine.XR.Management;
+using System.Reflection;
 using Unity.XR.OpenVR;
-using Assets.Scripts;
-using UnityEngine.XR;
-using Assets.Scripts.Util;
-using ImGuiNET;
-using Valve.VR.InteractionSystem;
-using StationeersVR.Utilities;
-using StationeersVR.VRCore;
-using StationeersVR.Patches;
-using UnityEngine.SceneManagement;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using Assets.Scripts.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.XR;
+using UnityEngine.XR.Management;
+using Valve.VR;
+using Valve.VR.InteractionSystem;
 
 namespace StationeersVR
 {
-    [BepInPlugin("StationeersVR", "Stationeers VR", "0.1.0.0")]
+    [BepInPlugin("StationeersVR", "Stationeers VR", "0.0.0.1")]
     public class StationeersVR : BaseUnityPlugin
     {
         public static StationeersVR Instance;
@@ -82,7 +84,7 @@ namespace StationeersVR
                 dumpall();
             }
             //This is the first loading screen Will find a better place for this eventually
-            if (SceneManager.GetActiveScene().name == "Splash")
+            /*if (SceneManager.GetActiveScene().name == "Splash")
                 foreach (var t in SceneManager.GetActiveScene().GetRootGameObjects())
                     if (t != null && Camera.current != null)
                         if (t.GetComponentInChildren<Canvas>() != null)
@@ -91,10 +93,11 @@ namespace StationeersVR
                             t.transform.position = Camera.current.transform.position + Camera.current.transform.forward * InputMouse.MaxInteractDistance;
                             VRPlayer.vrPlayerInstance.Scale(t.GetComponentInChildren<RectTransform>(), 0.7f);
                             t.transform.LookAt(Camera.current.transform);
-                            t.transform.Rotate(0, 180, 0);
+                            //t.transform.Rotate(0, 180, 0);
                             //ModLog.Error("SceneName: " + t.GetComponentInChildren<Canvas>().renderMode);
-                        }
+                        }*/
         }
+        GameObject gazeCursor;
 
         void StartStationeersVR()
         {
@@ -113,12 +116,17 @@ namespace StationeersVR
             if (VRManager.InitializeVR())
             {
                 VRManager.StartVR();
-                vrPlayer = new GameObject("VRPlayer");
-                DontDestroyOnLoad(vrPlayer);
-                vrPlayer.AddComponent<VRPlayer>();
                 gazeInput = this.GetOrAddComponent<GazeBasicInputModule>();
                 gazeInput.forceModuleActive = true;
-               
+                vrPlayer = new GameObject("VRPlayer");
+                gazeCursor = new GameObject("GazeCursor");
+                gazeCursor.AddComponent<SimpleGazeCursor>();
+                vrPlayer.AddComponent<VRPlayer>();
+                DontDestroyOnLoad(vrPlayer);
+                DontDestroyOnLoad(gazeCursor);
+
+                
+
                 /*vrGui = new GameObject("VRGui");
                 DontDestroyOnLoad(vrGui);
                 vrGui.AddComponent<VRGUI>();

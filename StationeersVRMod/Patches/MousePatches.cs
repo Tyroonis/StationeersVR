@@ -3,7 +3,7 @@ using Assets.Scripts.GridSystem;
 using Assets.Scripts.Inventory;
 using Assets.Scripts.Objects;
 using Assets.Scripts.UI;
-﻿using Assets.Scripts.Util;
+using Assets.Scripts.Util;
 using HarmonyLib;
 using StationeersVR.Utilities;
 using StationeersVR.VRCore;
@@ -26,11 +26,11 @@ namespace StationeersVR.Patches
             static bool Prefix(ref Ray __result)
             {
                 Vector2 pos = SimpleGazeCursor.GetRayCastMode();
-                __result = Camera.current.ScreenPointToRay(pos);
+                __result = Camera.main.ScreenPointToRay(pos);
                 return false;
             }
         }
-       
+
         [HarmonyPatch(typeof(InputMouse), nameof(InputMouse.GetHoverWorldSlot))]
         public static class InputMouse_GetHoverWorldSlot_Patch
         {
@@ -64,7 +64,7 @@ namespace StationeersVR.Patches
                 Vector3 worldPoint = Vector3.zero;
                 if (RectTransformUtility.ScreenPointToWorldPointInRectangle(__instance.RectTransform, eventData.position, eventData.pressEventCamera, out worldPoint))
                 {
-                    __instance.RectTransform.position = worldPoint;
+                    __instance.RectTransform.position = worldPoint;//new Vector3( worldPoint.x, worldPoint.y, __instance.RectTransform.position.z);
                 }
                 return false;
             }
@@ -77,11 +77,11 @@ namespace StationeersVR.Patches
             [HarmonyPrefix]
             static bool Prefix(InputMouse __instance)
             {
-                PassiveTooltip passiveTooltip = default(PassiveTooltip);
+                PassiveTooltip passiveTooltip = default;
                 __instance.DraggedThing = null;
                 if (Physics.Raycast(Camera.current.ScreenPointToRay(SimpleGazeCursor.GetRayCastMode()), out var hitInfo, InputMouse.MaxInteractDistance, CursorManager.Instance.CursorHitMask))
                 {
-                   // ModLog.Error("Idle()");
+                    // ModLog.Error("Idle()");
                     __instance.CursorTransform = hitInfo.transform;
                     __instance.CursorThing = Thing.Find(hitInfo.collider);
                     __instance.CursorItem = __instance.CursorThing as Item;

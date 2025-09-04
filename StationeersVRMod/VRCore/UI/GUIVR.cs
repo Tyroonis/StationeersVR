@@ -40,64 +40,77 @@ namespace StationeersVR.VRCore.UI
         public static Transform panelDyanmicThing;
         public static Transform windowLeftHand;
         public static Transform windowRightHand;
+        public static GameObject blankGO;
 
         public static Quaternion lastVrPlayerRotation = Quaternion.identity;
 
-        [HarmonyPatch(typeof(WorldManager), nameof(WorldManager.ManagerAwake))]
+        [HarmonyPatch(typeof(WorldManager), nameof(WorldManager.ManagerStart))]
         public static class WorldManager_ManagerAwake_Patch
         {
             [HarmonyPostfix]
-            static void Postfix()
+            static void Postfix(WorldManager __instance)
             {
                 VRManager.TryRecenter();
-                gazeCursor = new GameObject("GazeCursor");
-                DontDestroyOnLoad(gazeCursor);
-                gazeCursor.AddComponent<SimpleGazeCursor>();
+                //gazeCursor = new GameObject("GazeCursor");
+                //DontDestroyOnLoad(gazeCursor);
+                //gazeCursor.AddComponent<SimpleGazeCursor>();
 
-                gameCanvas = GameObject.Find("GameCanvas").transform;
-                gameCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-                gameCanvas.gameObject.layer = 27;
-                ModLog.Error("GameCanvas: " + gameCanvas);
+                //__instance.GetOrAddComponent<RuntimeCanvasWorldSpaceManager>();
 
-                alertCanvas = GameObject.Find("AlertCanvas").transform;
-                alertCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-                alertCanvas.gameObject.layer = 27;
-                ModLog.Error("AlertCanvas: " + alertCanvas);
+                //__instance.gameObject.AddComponent<VRHUDManager>();
 
-                popupsCanvas = GameObject.Find("PopupsCanvas").transform;
-                popupsCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-                popupsCanvas.gameObject.layer = 27;
-                ModLog.Error("PopupsCanvas: " + popupsCanvas);
+                //gameCanvas = GameObject.Find("GameCanvas").transform;
+                
+               //gameCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+               //gameCanvas.gameObject.layer = 27;
+               //gameCanvas.GetOrAddComponent<VRHUDManager>();
 
-                panelDyanmicThing = GameObject.Find("PanelDynamicThing").transform;
-                panelDyanmicThing.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-                panelDyanmicThing.gameObject.layer = 27;
-                ModLog.Error("PanelDynamicThing: " + panelDyanmicThing);
 
-                panelHelpMenu = GameObject.Find("PanelHelpMenu").transform;
-                panelHelpMenu.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-                panelHelpMenu.gameObject.layer = 27;
-                panelHelpMenu.GetComponent<Canvas>().sortingOrder = gameCanvas.GetComponent<Canvas>().sortingOrder + 1;
-                ModLog.Error("PanelHelpMenu: " + panelHelpMenu);
 
-                panelClothing = gameCanvas.Find("PanelClothing").transform;
-                panelStatusInfo = gameCanvas.Find("PanelStatusInfo").transform;
-                panelHands = gameCanvas.Find("PanelHands").transform;
-                helperHints = gameCanvas.Find("HelperHints").transform;
-                inventoryWindows = gameCanvas.Find("InventoryWindows").transform;
-                inventoryWindows.gameObject.layer = 27;
-                cursor = gameCanvas.Find("Cursor");
-                stationpediaHint = gameCanvas.Find("StationpediaHint");
-                panelInputPrefabs = gameCanvas.Find("PanelInputPrefabs");
 
-                ModLog.Error("panelClothing: " + panelClothing);
-                ModLog.Error("panelStatusInfo: " + panelStatusInfo);
-                ModLog.Error("PanelHands: " + panelHands);
-                ModLog.Error("HelperHints: " + helperHints);
-                ModLog.Error("InventoryWindows: " + inventoryWindows);
-                ModLog.Error("Cursor: " + cursor);
-                ModLog.Error("StationpediaHint: " + stationpediaHint);
-                ModLog.Error("PanelInputPrefabs: " + panelInputPrefabs);
+                //ModLog.Error("GameCanvas: " + gameCanvas);
+                //ModLog.Error("GameCanvas VRHUDManager: " + gameCanvas.GetComponent<VRHUDManager>());
+
+
+                /* alertCanvas = GameObject.Find("AlertCanvas").transform;
+                 alertCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                 alertCanvas.gameObject.layer = 27;
+                 ModLog.Error("AlertCanvas: " + alertCanvas);
+
+                 popupsCanvas = GameObject.Find("PopupsCanvas").transform;
+                 popupsCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                 popupsCanvas.gameObject.layer = 27;
+                 ModLog.Error("PopupsCanvas: " + popupsCanvas);
+
+                 panelDyanmicThing = GameObject.Find("PanelDynamicThing").transform;
+                 panelDyanmicThing.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                 panelDyanmicThing.gameObject.layer = 27;
+                 ModLog.Error("PanelDynamicThing: " + panelDyanmicThing);
+
+                 panelHelpMenu = GameObject.Find("PanelHelpMenu").transform;
+                 panelHelpMenu.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                 panelHelpMenu.gameObject.layer = 27;
+                 panelHelpMenu.GetComponent<Canvas>().sortingOrder = gameCanvas.GetComponent<Canvas>().sortingOrder + 1;
+                 ModLog.Error("PanelHelpMenu: " + panelHelpMenu);
+
+                 panelClothing = gameCanvas.Find("PanelClothing").transform;
+                 panelStatusInfo = gameCanvas.Find("PanelStatusInfo").transform;
+                 panelHands = gameCanvas.Find("PanelHands").transform;
+                 helperHints = gameCanvas.Find("HelperHints").transform;
+                 inventoryWindows = gameCanvas.Find("InventoryWindows").transform;
+                 inventoryWindows.gameObject.layer = 27;
+                 cursor = gameCanvas.Find("Cursor");
+                 stationpediaHint = gameCanvas.Find("StationpediaHint");
+                 panelInputPrefabs = gameCanvas.Find("PanelInputPrefabs");
+
+                 ModLog.Error("panelClothing: " + panelClothing);
+                 ModLog.Error("panelStatusInfo: " + panelStatusInfo);
+                 ModLog.Error("PanelHands: " + panelHands);
+                 ModLog.Error("HelperHints: " + helperHints);
+                 ModLog.Error("InventoryWindows: " + inventoryWindows);
+                 ModLog.Error("Cursor: " + cursor);
+                 ModLog.Error("StationpediaHint: " + stationpediaHint);
+                 ModLog.Error("PanelInputPrefabs: " + panelInputPrefabs);*/
             }
         }
 
@@ -114,13 +127,20 @@ namespace StationeersVR.VRCore.UI
 
         public static void UpdateHud()
         {
+            if(gameCanvas != null)
+            {
+                //if (gameCanvas.GetComponent<CanvasWorldSpaceConverter>() == null)
+                    //gameCanvas.GetOrAddComponent<CanvasWorldSpaceConverter>();
+               // t.ConvertToWorldSpace();
+            }
             if (Camera.current != null && gameCanvas != null)
             {
-                float scaleFactor = 2.5f / Camera.current.pixelWidth / 2;
+                /*float scaleFactor = 2.5f / Camera.current.pixelWidth / 2;
                 float scaleFactorx = 4.5f / Camera.current.pixelWidth / 2;
                 float scaleFactory = 3.5f / Camera.current.pixelWidth / 2;
                 float hudDistance = 0.8f;
                 float hudVerticalOffset = +0f;
+                
                 if (GameObject.Find("PanelInputText") != null)
                 {
                     panelInputText = GameObject.Find("PanelInputText").transform;
@@ -193,7 +213,7 @@ namespace StationeersVR.VRCore.UI
                 alertCanvas.GetComponent<RectTransform>().localScale = Vector3.one * scaleFactor * hudDistance * 1;
                 alertCanvas.LookAt(playerInstance.position);
                 alertCanvas.rotation = playerInstance.rotation;
-                alertCanvas.transform.position = playerInstance.position + alertCanvas.rotation * offsetPosition;
+                alertCanvas.transform.position = playerInstance.position + alertCanvas.rotation * offsetPosition;*/
             }
         }
 
