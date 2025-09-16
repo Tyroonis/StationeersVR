@@ -208,13 +208,19 @@ namespace StationeersVR
     [HarmonyPatch(typeof(CameraController), nameof(CameraController.SetMouseLook))]
     class CameraController_SetMouseLook_Patch
     {
+        public static float _lastHmdYaw;
+        public static bool _initted;
+        public static float headTrackingStrength = 2.0f; // >1 = amplify, <1 = dampen
+
         static bool Prefix(CameraController __instance)
         {
 
             //Setting this to zero so it does not cause any issues
+            var hmd = Valve.VR.InteractionSystem.Player.instance.hmdTransform;
             float num = Singleton<InputManager>.Instance.GetAxis("LookY");
             if (KeyManager.HasAxis(ControllerMap.VerticalLook))
             {
+                //-hmd.localRotation.eulerAngles.y
                 num = Mathf.Clamp(num + ControllerMap.VerticalLook.Output, -1f, 1f);
             }
             float num2 = Singleton<InputManager>.Instance.GetAxis("LookX");
@@ -223,7 +229,26 @@ namespace StationeersVR
                 num2 = Mathf.Clamp(num2 + ControllerMap.HorizontalLook.Output, -1f, 1f);
             }
             //__instance.RotationX += num * CameraController.CameraSensitivity * (float)((!Settings.CurrentData.InvertMouse) ? 1 : (-1));
-            __instance.RotationY += num2 * CameraController.CameraSensitivity;
+            //__instance.RotationY += num2 * CameraController.CameraSensitivity + hmd.localRotation.eulerAngles.y;
+
+            if (!_initted)
+            {
+                _lastHmdYaw = hmd.localRotation.eulerAngles.y;
+                _initted = true;
+            }
+
+            float currentHmdYaw = hmd.localRotation.eulerAngles.y;
+            float deltaHmdYaw = Mathf.DeltaAngle(_lastHmdYaw, currentHmdYaw);
+            _lastHmdYaw = currentHmdYaw;
+
+            float inputDelta = num2 * CameraController.CameraSensitivity;
+            float headDelta = deltaHmdYaw * headTrackingStrength;
+
+            __instance.RotationY += headDelta + inputDelta;
+
+
+
+
             //__instance.RotationX = InputHelpers.ClampAngle(__instance.RotationX, __instance.CameraTiltMinimum, __instance.CameraTiltMaximum);
             //VR Smooth Turn
             //Below turns the VR Camera with the player

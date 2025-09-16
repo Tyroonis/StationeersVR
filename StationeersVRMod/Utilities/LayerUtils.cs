@@ -25,6 +25,8 @@ using StationeersVR.Utilities;
     Layer Index: 23, Layer Name: BlockSound
     Layer Index: 24, Layer Name: Plants
     Layer Index: 25, Layer Name: Cables
+    Layer Index: 27, Layer Name: LiquidSolverParticles
+    Layer Index: 29, Layer Name: ThumbnailCreation
  */
 namespace StationeersVR.Utilities
 {
@@ -35,9 +37,9 @@ namespace StationeersVR.Utilities
         // in sync with what is in the prefab in Unity Editor.
         //public static readonly int WATER = 4;
         public static readonly int PLAYER = 9;
-        private static readonly int HANDS_LAYER = 27;
+        private static readonly int HANDS_LAYER = 30;
         public static readonly int HANDS_LAYER_MASK = (1 << HANDS_LAYER);
-        public static readonly int UI_PANEL_LAYER = 28;
+        public static readonly int UI_PANEL_LAYER = 31;
         public static readonly int UI_PANEL_LAYER_MASK = (5 << UI_PANEL_LAYER);
         private static readonly int WORLDSPACE_UI_LAYER = 12;
         public static readonly int WORLDSPACE_UI_LAYER_MASK = (1 << WORLDSPACE_UI_LAYER);

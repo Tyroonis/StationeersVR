@@ -1,25 +1,26 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-using UnityEngine.EventSystems;
-using static ImGuiNET.Unity.CursorShapesAsset;
-using System.Collections.Generic;
-using ImGuiNET;
-using UI.ImGuiUi;
-using Assets.Scripts.UI;
-using Assets.Scripts.Objects;
-using Assets.Scripts;
-using Assets.Scripts.Util;
-using UnityEngine.UI;
-using System.Linq;
-using Discord;
-using Objects.Items;
-using static UnityEngine.UIElements.UIR.Allocator2D;
-using Assets.Scripts.Inventory;
+﻿using Assets.Scripts;
 using Assets.Scripts.GridSystem;
-using Valve.VR.InteractionSystem;
-using System.Xml;
+using Assets.Scripts.Inventory;
+using Assets.Scripts.Objects;
+using Assets.Scripts.UI;
+using Assets.Scripts.Util;
+using Discord;
+using ImGuiNET;
+using ImGuiNET.Unity;
+using Objects.Items;
 using StationeersVR.VRCore.UI;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
+using UI.ImGuiUi;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using Valve.VR.InteractionSystem;
+using static ImGuiNET.Unity.CursorShapesAsset;
+using static UnityEngine.UIElements.UIR.Allocator2D;
 
 namespace StationeersVR.Utilities
 {
@@ -52,12 +53,12 @@ namespace StationeersVR.Utilities
                 line.startWidth = 0.002f;
                 line.endWidth = 0.004f;
             }
-            cursorMaterial = new Material(CursorManager.Instance.CursorShader);
+            cursorMaterial = new Material(Shader.Find("Unlit/Color"));
             cursorMaterial.color = Color.white;
             cursorInstance = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             cursorInstance.transform.localScale = new Vector3(0.06f, 0.06f, 0.06f);
             cursorInstance.GetComponent<Renderer>().material = cursorMaterial;
-            cursorInstance.layer = 27;
+            cursorInstance.layer = 30;
             if (cursorInstance.GetComponent<SphereCollider>() != null)
                 cursorInstance.GetComponent<SphereCollider>().enabled = false;
             DontDestroyOnLoad(cursorInstance);
@@ -77,17 +78,17 @@ namespace StationeersVR.Utilities
             //Need to use Camera pixelWidth and pixelHeight with the Screen width and heigh so you have no restrction on mouse movement in vr
             if (!InventoryManager.AllowMouseControl)
             {
-                return new Vector2(Input.mousePosition.x / Screen.width * Camera.current.pixelWidth, Input.mousePosition.y / Screen.height * Camera.current.pixelHeight);
+                return new Vector2(Input.mousePosition.x / Screen.width * Camera.main.pixelWidth, Input.mousePosition.y / Screen.height * Camera.main.pixelHeight);
             }
             else
             {
-                return new Vector2(Camera.current.pixelWidth / 2f, Camera.current.pixelHeight / 2f);
+                return new Vector2(Camera.main.pixelWidth / 2f, Camera.main.pixelHeight / 2f);
             }
         }
 
         public void ScaleVrCursor(float FixedSize)
         {
-            if (Camera.current == null)
+            if (Camera.main == null)
             {
                 var distance = (Camera.main.transform.position - cursorInstance.transform.position).magnitude;
                 var size = distance * FixedSize * Camera.main.fieldOfView;
@@ -96,20 +97,20 @@ namespace StationeersVR.Utilities
             }
             else
             {
-                var distance = (Camera.current.transform.position - cursorInstance.transform.position).magnitude;
-                var size = distance * FixedSize * Camera.current.fieldOfView;
+                var distance = (Camera.main.transform.position - cursorInstance.transform.position).magnitude;
+                var size = distance * FixedSize * Camera.main.fieldOfView;
                 cursorInstance.transform.localScale = Vector3.one * size;
-                cursorInstance.transform.forward = cursorInstance.transform.position - Camera.current.transform.position;
+                cursorInstance.transform.forward = cursorInstance.transform.position - Camera.main.transform.position;
             }
         }
 
         private void UpdateCursor()
         {
             // Create a gaze ray pointing forward from the camera
-            if (Camera.current != null)
+
+            if (Camera.main != null && cursorInstance != null)
             {
                 //Scale The Cursor so it's not to small when far and to big when close
-
                 oldSortingOrder = cursorInstance.GetComponent<Renderer>().sortingOrder;
                 //This Raycast that hits the UI, Iventory, menus ect.
                 if (raycast.gameObject != null && raycast.distance < InputMouse.MaxInteractDistance)
@@ -134,22 +135,22 @@ namespace StationeersVR.Utilities
                     if (Cursor.lockState == CursorLockMode.None)
                     {
                         cursorInstance.GetComponent<Renderer>().sortingOrder = oldSortingOrder;
-                        Vector2 test = new Vector2(Input.mousePosition.x / Screen.width * Camera.current.pixelWidth, Input.mousePosition.y / Screen.height * Camera.current.pixelHeight);
-                        Vector3 posi = Camera.current.ScreenPointToRay(test).GetPoint(InputMouse.MaxInteractDistance);
+                        Vector2 test = new (Input.mousePosition.x / Screen.width * Camera.main.pixelWidth, Input.mousePosition.y / Screen.height * Camera.main.pixelHeight);
+                        Vector3 posi = Camera.main.ScreenPointToRay(test).GetPoint(InputMouse.MaxInteractDistance);
                         cursorInstance.transform.position = posi;
                     }
                     if (Cursor.lockState == CursorLockMode.Locked)
                     {
                         cursorInstance.GetComponent<Renderer>().sortingOrder = oldSortingOrder;
-                        Vector3 defaultpos = new Vector3(Camera.current.pixelWidth / 2f, Camera.current.pixelHeight / 2f, InputMouse.MaxInteractDistance);
-                        cursorInstance.transform.position = Camera.current.ScreenToWorldPoint(defaultpos);
+                        Vector3 defaultpos = new  (Camera.main.pixelWidth / 2f, Camera.main.pixelHeight / 2f, InputMouse.MaxInteractDistance);
+                        cursorInstance.transform.position = Camera.main.ScreenToWorldPoint(defaultpos);
                     }
                 }
             }
         }
         private void UpdateDebugPointer()
         {
-            if (Camera.current == null)
+            if (Camera.main == null)
             {
                 return;
             }
@@ -168,14 +169,14 @@ namespace StationeersVR.Utilities
                 {
                     if (Cursor.lockState == CursorLockMode.None)
                     {
-                        Vector2 test = new Vector2(Input.mousePosition.x / Screen.width * Camera.current.pixelWidth, Input.mousePosition.y / Screen.height * Camera.current.pixelHeight);
-                        Vector3 posi = Camera.current.ScreenPointToRay(test).GetPoint(InputMouse.MaxInteractDistance);
+                        Vector2 test = new (Input.mousePosition.x / Screen.width * Camera.main.pixelWidth, Input.mousePosition.y / Screen.height * Camera.main.pixelHeight);
+                        Vector3 posi = Camera.main.ScreenPointToRay(test).GetPoint(InputMouse.MaxInteractDistance);
                         line.SetPosition(1, posi);
                     }
                     if (Cursor.lockState == CursorLockMode.Locked)
                     {
-                        Vector3 defaultpos = new Vector3(Camera.current.pixelWidth / 2f, Camera.current.pixelHeight / 2f, InputMouse.MaxInteractDistance);
-                        line.SetPosition(1, Camera.current.ScreenToWorldPoint(defaultpos));
+                        Vector3 defaultpos = new (Camera.main.pixelWidth / 2f, Camera.main.pixelHeight / 2f, InputMouse.MaxInteractDistance);
+                        line.SetPosition(1, Camera.main.ScreenToWorldPoint(defaultpos));
                     }
                 }
             }

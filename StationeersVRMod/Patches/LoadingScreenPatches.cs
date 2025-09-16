@@ -12,11 +12,11 @@ namespace StationeersVR
             if (active)
             {
                 
-                VROverlay.ShowLoadingScreenInVR("LoadingScreen", ImGuiLoadingScreen.backgroundTexture, 10f, 3f, 0.2f);
+                //VROverlay.ShowLoadingScreenInVR("LoadingScreen", ImGuiLoadingScreen.backgroundTexture, 10f, 3f, 0.2f);
             }
             else
             {
-                VROverlay.HideLoadingScreenInVR();
+               // VROverlay.HideLoadingScreenInVR();
             }
         }  
     }

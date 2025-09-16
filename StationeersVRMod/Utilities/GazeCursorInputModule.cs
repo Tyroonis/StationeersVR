@@ -7,7 +7,7 @@ namespace StationeersVR.Utilities
 {
     public class GazeBasicInputModule : PointerInputModule
     {
-        private readonly MouseState m_MouseState = new MouseState();
+        private readonly MouseState m_MouseState = new ();
 
         protected GazeBasicInputModule()
         { }
@@ -59,11 +59,10 @@ namespace StationeersVR.Utilities
 
         protected MouseState CreateGazePointerEvent(int id)
         {
-            PointerEventData data;
-            if (Camera.current != null)
+            if (Camera.main != null)
             {
                 Vector2 pos = SimpleGazeCursor.GetRayCastMode();
-                bool pointerData = GetPointerData(-1, out data, create: true);
+                bool pointerData = GetPointerData(-1, out PointerEventData data, create: true);
                 data.Reset();
                 if (pointerData)
                 {
@@ -109,7 +108,7 @@ namespace StationeersVR.Utilities
 
             var leftPressData = pointerData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 
-            if(ConfigFile.UseVrControls)
+            if (ConfigFile.UseVrControls)
                 ProcessPress(leftPressData.buttonData, leftPressData.PressedThisFrame() || VRControls.instance.GetButtonDown(KeyMap.PrimaryAction), leftPressData.ReleasedThisFrame() || VRControls.instance.GetButtonUp(KeyMap.PrimaryAction));
             else
                 ProcessPress(leftPressData.buttonData, leftPressData.PressedThisFrame(), leftPressData.ReleasedThisFrame());

@@ -41,7 +41,7 @@ namespace StationeersVR.Patches
                 InputFieldManager.start(null, __instance, false);
             else
                 InputFieldManager.StartMKB(null, __instance);
-        }       
+        }
     }
 
 
@@ -70,26 +70,26 @@ namespace StationeersVR.Patches
 
     }
 
-   /* [HarmonyPatch(typeof(Input), "GetKeyDownInt")]
-    class PatchInputGetKeyDownInt
-    {
-        public static bool Prefix(ref bool __result, KeyCode key)
-        {
-            //ModLog.Error("KeyDown: " + key);
-            return !Utilities.ConfigFile.UseVrControls || InputFieldManager.handleReturnKeyInput(ref __result, key);
-        }
-    }
+    /* [HarmonyPatch(typeof(Input), "GetKeyDownInt")]
+     class PatchInputGetKeyDownInt
+     {
+         public static bool Prefix(ref bool __result, KeyCode key)
+         {
+             //ModLog.Error("KeyDown: " + key);
+             return !Utilities.ConfigFile.UseVrControls || InputFieldManager.handleReturnKeyInput(ref __result, key);
+         }
+     }
 
-    [HarmonyPatch(typeof(Input), "GetKeyInt")]
-    class PatchInputGetKeyInt
-    {
+     [HarmonyPatch(typeof(Input), "GetKeyInt")]
+     class PatchInputGetKeyInt
+     {
 
-        public static bool Prefix(ref bool __result, KeyCode key)
-        {
-            //ModLog.Error("Key: " + key);
-            return !Utilities.ConfigFile.UseVrControls || InputFieldManager.handleReturnKeyInput(ref __result, key);
-        }
-    }*/
+         public static bool Prefix(ref bool __result, KeyCode key)
+         {
+             //ModLog.Error("Key: " + key);
+             return !Utilities.ConfigFile.UseVrControls || InputFieldManager.handleReturnKeyInput(ref __result, key);
+         }
+     }*/
 }
 public class InputFieldManager : MonoBehaviour
 {
@@ -153,7 +153,7 @@ public class InputFieldManager : MonoBehaviour
 
     void Update()
     {
-        if(Input.anyKeyDown)
+        if (Input.anyKeyDown)
         {
             if (initialized)
             {
@@ -169,7 +169,7 @@ public class InputFieldManager : MonoBehaviour
                 }
                 else
                     initialized = false;
-                
+
             }
         }
     }
@@ -177,7 +177,7 @@ public class InputFieldManager : MonoBehaviour
     private static void OnKeyboardClosed(VREvent_t args)
     {
         closeTime = Time.fixedTime;
-        StringBuilder textBuilder = new StringBuilder(256);
+        StringBuilder textBuilder = new(256);
         int caretPosition = (int)SteamVR.instance.overlay.GetKeyboardText(textBuilder, 256);
         string text = textBuilder.ToString();
 
